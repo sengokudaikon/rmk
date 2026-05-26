@@ -13,6 +13,6 @@ mod keyboard_peripheral {
             p.P0_30,
             ::embassy_nrf::gpio::Level::Low,
             ::embassy_nrf::gpio::OutputDrive::Standard,
-        ))
+        ), crate::diagnostic_led::DiagnosticRole::Peripheral)
     }
 }
