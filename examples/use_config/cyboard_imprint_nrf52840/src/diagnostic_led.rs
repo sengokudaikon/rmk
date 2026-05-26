@@ -98,9 +98,9 @@ impl DiagnosticLed {
             (0, 3) => self.flash(2), // BT1
             (0, 5) => self.flash(3), // BT2
             (0, 6) | (0, 7) => self.flash(4), // NEXT_BT/PREV_BT
-            (1, 2) => self.flash(6), // SWITCH
-            (1, 3) => self.flash(7), // CLR_PEER pressed; actual clear also flashes after hold
-            _ => {}
+            (1, 2) => self.flash(1), // ZMK-stock BT0 position
+            (1, 3) => self.flash(5), // ZMK-stock CLR_BT position
+            _ => self.flash(1),      // Central matrix is seeing a key.
         }
     }
 

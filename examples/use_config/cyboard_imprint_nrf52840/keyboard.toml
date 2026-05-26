@@ -18,8 +18,8 @@ keymap = [
         # left thumb/bottom matrix row
         # Diagnostic BLE controls: CLR_BT, BT0, BT1, BT2, NEXT_BT, PREV_BT.
         ["_", "User5", "User0", "User1", "_", "User2", "User3", "User4"],
-        # Diagnostic maintenance controls: SWITCH, CLR_PEER.
-        ["_", "_", "User6", "User7", "_", "_", "_", "_"],
+        # ZMK-stock BT positions: BT0, CLR_BT.
+        ["_", "_", "User0", "User5", "_", "_", "_", "_"],
         ["B", "V", "C", "X", "Z", "LCtrl", "_", "_"],
         ["G", "F", "D", "S", "A", "LShift", "_", "_"],
         ["T", "R", "E", "W", "Q", "Tab", "_", "_"],
