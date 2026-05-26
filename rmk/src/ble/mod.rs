@@ -530,11 +530,11 @@ async fn advertise<'a, 'b, C: Controller>(
     // Wait for 10ms to ensure the USB is checked
     embassy_time::Timer::after_millis(10).await;
     let mut advertiser_data = [0; 31];
-    AdStructure::encode_slice(
+    let mut scan_data = [0; 31];
+    let advertiser_data_len = AdStructure::encode_slice(
         &[
             AdStructure::Flags(LE_GENERAL_DISCOVERABLE | BR_EDR_NOT_SUPPORTED),
             AdStructure::CompleteServiceUuids16(&[BATTERY.to_le_bytes(), HUMAN_INTERFACE_DEVICE.to_le_bytes()]),
-            AdStructure::CompleteLocalName(name.as_bytes()),
             AdStructure::Unknown {
                 ty: 0x19, // Appearance
                 data: &KEYBOARD.to_le_bytes(),
@@ -542,6 +542,8 @@ async fn advertise<'a, 'b, C: Controller>(
         ],
         &mut advertiser_data[..],
     )?;
+    let scan_data_len =
+        AdStructure::encode_slice(&[AdStructure::CompleteLocalName(name.as_bytes())], &mut scan_data[..])?;
 
     let advertise_config = AdvertisementParameters {
         // Use 1M for connectable advertising so hosts using legacy scanning
@@ -560,8 +562,8 @@ async fn advertise<'a, 'b, C: Controller>(
         .advertise(
             &advertise_config,
             Advertisement::ConnectableScannableUndirected {
-                adv_data: &advertiser_data[..],
-                scan_data: &[],
+                adv_data: &advertiser_data[..advertiser_data_len],
+                scan_data: &scan_data[..scan_data_len],
             },
         )
         .await?;
