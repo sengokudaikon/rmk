@@ -3,8 +3,8 @@
   "uid": 16882930253541522617,
   "layout": [
     [
-      [-1, "KC_ESCAPE", "KC_DELETE", "KC_ENTER", -1, "MO(2)", "MO(1)", "KC_LGUI"],
-      [-1, -1, "KC_LALT", "KC_LGUI", -1, -1, -1, -1],
+      [-1, "CLR_BT", "BT0", "BT1", -1, "BT2", "NEXT_BT", "PREV_BT"],
+      [-1, -1, "SWITCH", "CLR_PEER", -1, -1, -1, -1],
       ["KC_B", "KC_V", "KC_C", "KC_X", "KC_Z", "KC_LCTRL", -1, -1],
       ["KC_G", "KC_F", "KC_D", "KC_S", "KC_A", "KC_LSHIFT", -1, -1],
       ["KC_T", "KC_R", "KC_E", "KC_W", "KC_Q", "KC_TAB", -1, -1],

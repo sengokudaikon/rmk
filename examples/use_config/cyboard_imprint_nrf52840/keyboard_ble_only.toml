@@ -16,8 +16,10 @@ layers = 3
 # Physical number row is row 5/12; row 6/13 is left unused for this build.
 keymap = [
     [
-        ["_", "Escape", "Delete", "Enter", "_", "MO(2)", "MO(1)", "LGui"],
-        ["_", "_", "LAlt", "LGui", "_", "_", "_", "_"],
+        # Diagnostic BLE controls: CLR_BT, BT0, BT1, BT2, NEXT_BT, PREV_BT.
+        ["_", "User5", "User0", "User1", "_", "User2", "User3", "User4"],
+        # Diagnostic maintenance controls: SWITCH, CLR_PEER.
+        ["_", "_", "User6", "User7", "_", "_", "_", "_"],
         ["B", "V", "C", "X", "Z", "LCtrl", "_", "_"],
         ["G", "F", "D", "S", "A", "LShift", "_", "_"],
         ["T", "R", "E", "W", "Q", "Tab", "_", "_"],
