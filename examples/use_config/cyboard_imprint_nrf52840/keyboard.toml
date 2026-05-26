@@ -1,0 +1,97 @@
+[keyboard]
+name = "Cyboard Imprint RMK"
+product_name = "Cyboard Imprint RMK"
+vendor_id = 0x4c4b
+product_id = 0x494d
+manufacturer = "cyboard-rmk"
+chip = "nrf52840"
+
+[layout]
+rows = 14
+cols = 8
+layers = 2
+
+# Matrix coordinates are the raw Cyboard/ZMK transform coordinates:
+# left half rows 0..6, right half rows 7..13, 8 columns per half.
+keymap = [
+    [
+        # left thumb/bottom matrix row
+        ["_", "Escape", "Delete", "Enter", "_", "MO(1)", "MO(1)", "LGui"],
+        ["_", "_", "LAlt", "LGui", "_", "_", "_", "_"],
+        ["B", "V", "C", "X", "Z", "LShift", "_", "_"],
+        ["G", "F", "D", "S", "A", "LCtrl", "_", "_"],
+        ["T", "R", "E", "W", "Q", "Tab", "_", "_"],
+        ["Kc5", "Kc4", "Kc3", "Kc2", "Kc1", "Equal", "_", "_"],
+        ["F5", "F4", "F3", "F2", "F1", "Escape", "_", "_"],
+
+        # right thumb/bottom matrix row
+        ["_", "Grave", "Backspace", "Space", "_", "MO(1)", "MO(1)", "CapsLock"],
+        ["_", "_", "LeftBracket", "RightBracket", "_", "_", "_", "_"],
+        ["N", "M", "Comma", "Dot", "Slash", "RShift", "_", "_"],
+        ["H", "J", "K", "L", "Semicolon", "Quote", "_", "_"],
+        ["Y", "U", "I", "O", "P", "Backslash", "_", "_"],
+        ["Kc6", "Kc7", "Kc8", "Kc9", "Kc0", "Minus", "_", "_"],
+        ["F6", "F7", "F8", "F9", "F10", "F11", "_", "_"],
+    ],
+    [
+        ["_", "_", "_", "_", "_", "_", "_", "_"],
+        ["_", "_", "_", "_", "_", "_", "_", "_"],
+        ["_", "_", "_", "_", "_", "_", "_", "_"],
+        ["_", "_", "_", "_", "_", "_", "_", "_"],
+        ["_", "_", "_", "_", "_", "_", "_", "_"],
+        ["_", "_", "_", "_", "_", "_", "_", "_"],
+        ["_", "_", "_", "_", "_", "_", "_", "_"],
+
+        ["_", "_", "_", "_", "_", "_", "_", "_"],
+        ["_", "_", "_", "_", "_", "_", "_", "_"],
+        ["_", "_", "_", "_", "_", "_", "_", "_"],
+        ["Left", "Down", "Up", "Right", "_", "_", "_", "_"],
+        ["_", "Home", "PageUp", "PageDown", "End", "_", "_", "_"],
+        ["_", "_", "_", "_", "_", "_", "_", "_"],
+        ["_", "_", "_", "_", "_", "_", "_", "_"],
+    ],
+]
+
+[storage]
+
+[ble]
+enabled = true
+
+[split]
+connection = "ble"
+
+[split.central]
+rows = 7
+cols = 8
+row_offset = 0
+col_offset = 0
+ble_addr = [0x18, 0xe2, 0x21, 0x80, 0xc0, 0xc7]
+
+[[split.central.output]]
+pin = "P1_02"
+initial_state_active = true
+low_active = false
+
+[split.central.matrix]
+matrix_type = "normal"
+row2col = true
+row_pins = ["P1_04", "P0_11", "P0_29", "P1_00", "P0_10", "P0_02", "P0_09"]
+col_pins = ["P1_06", "P1_15", "P1_13", "P1_11", "P0_31", "P0_22", "P0_24", "P0_20"]
+
+[[split.peripheral]]
+rows = 7
+cols = 8
+row_offset = 7
+col_offset = 0
+ble_addr = [0x7e, 0xfe, 0x73, 0x9e, 0x66, 0xe3]
+
+[[split.peripheral.output]]
+pin = "P1_02"
+initial_state_active = true
+low_active = false
+
+[split.peripheral.matrix]
+matrix_type = "normal"
+row2col = true
+row_pins = ["P1_04", "P0_11", "P0_29", "P1_00", "P0_10", "P0_02", "P0_09"]
+col_pins = ["P1_06", "P1_15", "P1_13", "P1_11", "P0_31", "P0_22", "P0_24", "P0_20"]

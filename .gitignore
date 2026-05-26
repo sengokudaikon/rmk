@@ -25,3 +25,6 @@ cyw43-firmware
 # rspress
 docs/dist
 docs/docs/v*
+
+# Local keyboard/device diagnostics
+keeb-info/
