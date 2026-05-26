@@ -80,6 +80,10 @@ impl DiagnosticLed {
     }
 
     async fn on_keyboard_event(&mut self, event: KeyboardEvent) {
+        if self.role != DiagnosticRole::Central {
+            return;
+        }
+
         if !event.pressed {
             return;
         }
