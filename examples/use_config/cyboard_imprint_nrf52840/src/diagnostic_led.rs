@@ -1,7 +1,7 @@
 use embassy_nrf::gpio::Output;
 use rmk::event::{
-    CentralConnectedEvent, ClearPeerEvent, ConnectionStatusChangeEvent, KeyboardEvent, KeyboardEventPos,
-    PeripheralConnectedEvent,
+    CentralConnectedEvent, ClearPeerEvent, ConnectionStatusChangeEvent, KeyboardEvent, LayerChangeEvent,
+    LedIndicatorEvent, PeripheralConnectedEvent,
 };
 use rmk::macros::processor;
 use rmk::types::ble::BleState;
@@ -19,7 +19,9 @@ pub enum DiagnosticRole {
         PeripheralConnectedEvent,
         CentralConnectedEvent,
         ClearPeerEvent,
-        KeyboardEvent
+        KeyboardEvent,
+        LayerChangeEvent,
+        LedIndicatorEvent
     ],
     poll_interval = 100
 )]
@@ -31,6 +33,8 @@ pub struct DiagnosticLed {
     ble_state: BleState,
     host_connected: bool,
     split_connected: bool,
+    active_layer: u8,
+    caps_lock: bool,
 }
 
 impl DiagnosticLed {
@@ -43,6 +47,8 @@ impl DiagnosticLed {
             ble_state: BleState::Inactive,
             host_connected: false,
             split_connected: false,
+            active_layer: 0,
+            caps_lock: false,
         }
     }
 
@@ -79,6 +85,15 @@ impl DiagnosticLed {
         self.flash(7);
     }
 
+    async fn on_layer_change_event(&mut self, event: LayerChangeEvent) {
+        self.active_layer = event.0;
+        self.flash(self.active_layer.saturating_add(1));
+    }
+
+    async fn on_led_indicator_event(&mut self, event: LedIndicatorEvent) {
+        self.caps_lock = event.0.caps_lock();
+    }
+
     async fn on_keyboard_event(&mut self, event: KeyboardEvent) {
         if self.role != DiagnosticRole::Central {
             return;
@@ -88,20 +103,11 @@ impl DiagnosticLed {
             return;
         }
 
-        let KeyboardEventPos::Key(pos) = event.pos else {
+        if !matches!(event.pos, rmk::event::KeyboardEventPos::Key(_)) {
             return;
-        };
-
-        match (pos.row, pos.col) {
-            (0, 1) => self.flash(5), // CLR_BT
-            (0, 2) => self.flash(1), // BT0
-            (0, 3) => self.flash(2), // BT1
-            (0, 5) => self.flash(3), // BT2
-            (0, 6) | (0, 7) => self.flash(4), // NEXT_BT/PREV_BT
-            (1, 2) => self.flash(1), // ZMK-stock BT0 position
-            (1, 3) => self.flash(5), // ZMK-stock CLR_BT position
-            _ => self.flash(1),      // Central matrix is seeing a key.
         }
+
+        self.flash(1);
     }
 
     async fn poll(&mut self) {
@@ -116,7 +122,7 @@ impl DiagnosticLed {
         }
 
         if self.role == DiagnosticRole::Central && self.host_connected {
-            self.set_led(true);
+            self.show_connected_central();
             return;
         }
 
@@ -129,6 +135,19 @@ impl DiagnosticLed {
             (DiagnosticRole::Central, BleState::Inactive, false) => self.set_led(self.tick % 40 == 0),
             (DiagnosticRole::Peripheral, _, true) => self.set_led(self.tick % 20 == 0 || self.tick % 20 == 2),
             (DiagnosticRole::Peripheral, _, false) => self.set_led(self.tick % 40 == 0),
+        }
+    }
+
+    fn show_connected_central(&mut self) {
+        if self.caps_lock {
+            self.set_led(true);
+            return;
+        }
+
+        match self.active_layer {
+            0 => self.set_led(self.tick % 40 == 0),
+            1 => self.set_led(self.tick % 20 == 0),
+            _ => self.set_led(self.tick % 20 == 0 || self.tick % 20 == 2),
         }
     }
 

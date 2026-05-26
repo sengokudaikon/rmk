@@ -56,10 +56,12 @@ The BLE-only build disables USB transport and will not type over USB. In current
 The onboard blue LED is used for bring-up diagnostics:
 
 - startup: several quick flashes
-- sparse flash: firmware is alive/idle
 - central key press: one quick flash
 - central advertising to host: repeating blink
-- central host connected: solid on
+- central host connected on base layer: sparse heartbeat
+- central host connected on layer 1: one short blink repeating
+- central host connected on layer 2: two short blinks repeating
+- Caps Lock enabled by the host: solid on
 - split connect/disconnect events: short flash bursts
 
 If the normal firmware makes both halves blink and central key presses flash, the matrix scan path is alive.
