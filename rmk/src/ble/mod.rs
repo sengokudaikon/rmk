@@ -544,8 +544,10 @@ async fn advertise<'a, 'b, C: Controller>(
     )?;
 
     let advertise_config = AdvertisementParameters {
-        primary_phy: PhyKind::Le2M,
-        secondary_phy: PhyKind::Le2M,
+        // Use 1M for connectable advertising so hosts using legacy scanning
+        // can discover the keyboard during pairing.
+        primary_phy: PhyKind::Le1M,
+        secondary_phy: PhyKind::Le1M,
         tx_power: TxPower::Plus8dBm,
         interval_min: Duration::from_millis(200),
         interval_max: Duration::from_millis(200),
