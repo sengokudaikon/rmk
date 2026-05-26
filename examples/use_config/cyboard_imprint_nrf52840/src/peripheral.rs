@@ -7,7 +7,7 @@ mod diagnostic_led;
 
 #[rmk_peripheral(id = 0)]
 mod keyboard_peripheral {
-    #[register_processor(event)]
+    #[register_processor(poll)]
     fn diagnostic_led() -> crate::diagnostic_led::DiagnosticLed {
         crate::diagnostic_led::DiagnosticLed::new(::embassy_nrf::gpio::Output::new(
             p.P0_30,
