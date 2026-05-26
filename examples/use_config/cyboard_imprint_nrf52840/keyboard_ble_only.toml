@@ -1,10 +1,11 @@
 [keyboard]
-name = "Cyboard Imprint RMK"
-product_name = "Cyboard Imprint RMK"
+name = "Cyboard Imprint RMK BLE"
+product_name = "Cyboard Imprint RMK BLE"
 vendor_id = 0x4c4b
 product_id = 0x494d
 manufacturer = "cyboard-rmk"
 chip = "nrf52840"
+usb_enable = false
 
 [layout]
 rows = 14
@@ -15,7 +16,6 @@ layers = 3
 # Physical number row is row 5/12; row 6/13 is left unused for this build.
 keymap = [
     [
-        # left thumb/bottom matrix row
         ["_", "Escape", "Delete", "Enter", "_", "MO(2)", "MO(1)", "LGui"],
         ["_", "_", "LAlt", "LGui", "_", "_", "_", "_"],
         ["B", "V", "C", "X", "Z", "LCtrl", "_", "_"],
@@ -24,7 +24,6 @@ keymap = [
         ["Kc5", "Kc4", "Kc3", "Kc2", "Kc1", "Equal", "_", "_"],
         ["_", "_", "_", "_", "_", "_", "_", "_"],
 
-        # right thumb/bottom matrix row
         ["_", "Grave", "Backspace", "Space", "_", "CapsLock", "MO(2)", "MO(1)"],
         ["_", "_", "LeftBracket", "RightBracket", "_", "_", "_", "_"],
         ["N", "M", "Comma", "Dot", "Slash", "RCtrl", "_", "_"],

@@ -76,3 +76,78 @@ dependencies = ["objcopy-peripheral"]
 
 [tasks.uf2]
 dependencies = ["uf2-central", "uf2-peripheral"]
+
+[tasks.objcopy-central-ble-only]
+install_crate = { crate_name = "cargo-binutils", binary = "cargo", test_arg = [
+    "objcopy",
+    "--help",
+] }
+command = "cargo"
+env = { KEYBOARD_TOML_PATH = "C:\\Users\\d\\Developer\\rmk\\examples\\use_config\\cyboard_imprint_nrf52840\\keyboard_ble_only.toml" }
+args = [
+    "objcopy",
+    "--release",
+    "--bin",
+    "central",
+    "--",
+    "-O",
+    "ihex",
+    "rmk-central-ble-only.hex",
+]
+dependencies = ["install-llvm-tools", "flip-link"]
+
+[tasks.objcopy-peripheral-ble-only]
+install_crate = { crate_name = "cargo-binutils", binary = "cargo", test_arg = [
+    "objcopy",
+    "--help",
+] }
+command = "cargo"
+env = { KEYBOARD_TOML_PATH = "C:\\Users\\d\\Developer\\rmk\\examples\\use_config\\cyboard_imprint_nrf52840\\keyboard_ble_only.toml" }
+args = [
+    "objcopy",
+    "--release",
+    "--bin",
+    "peripheral",
+    "--",
+    "-O",
+    "ihex",
+    "rmk-peripheral-ble-only.hex",
+]
+dependencies = ["install-llvm-tools", "flip-link"]
+
+[tasks.uf2-central-ble-only]
+install_crate = { crate_name = "cargo-hex-to-uf2", binary = "cargo", test_arg = [
+    "hex-to-uf2",
+    "--help",
+] }
+command = "cargo"
+args = [
+    "hex-to-uf2",
+    "--input-path",
+    "rmk-central-ble-only.hex",
+    "--output-path",
+    "rmk-central-ble-only.uf2",
+    "--family",
+    "nrf52840",
+]
+dependencies = ["objcopy-central-ble-only"]
+
+[tasks.uf2-peripheral-ble-only]
+install_crate = { crate_name = "cargo-hex-to-uf2", binary = "cargo", test_arg = [
+    "hex-to-uf2",
+    "--help",
+] }
+command = "cargo"
+args = [
+    "hex-to-uf2",
+    "--input-path",
+    "rmk-peripheral-ble-only.hex",
+    "--output-path",
+    "rmk-peripheral-ble-only.uf2",
+    "--family",
+    "nrf52840",
+]
+dependencies = ["objcopy-peripheral-ble-only"]
+
+[tasks.uf2-ble-only]
+dependencies = ["uf2-central-ble-only", "uf2-peripheral-ble-only"]
