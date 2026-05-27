@@ -66,6 +66,18 @@ The onboard blue LED is used for bring-up diagnostics:
 
 If the normal firmware makes both halves blink and central key presses flash, the matrix scan path is alive.
 
+## RGB Probe
+
+The Imprint RGB probe drives a low-brightness WS2812 stream on `P0_08`/`SPIM3` using GRB color order. It lights the first 64 LED positions on each half:
+
+- base layer: dim cyan
+- layer 1: dim green
+- layer 2+: dim purple
+- BLE advertising: blinking dim blue
+- Caps Lock: dim red
+
+This is a hardware bring-up probe, not the final per-key RGB map. Use it to confirm that the RGB data pin, color order, and approximate LED chain are working before mapping LED indices to physical keys.
+
 ## Layout
 
 Base layer:

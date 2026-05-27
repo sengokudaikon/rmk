@@ -1,13 +1,14 @@
 use proc_macro2::TokenStream as TokenStream2;
 use quote::{format_ident, quote};
-use rmk_config::resolved::Hardware;
 use rmk_config::resolved::hardware::{
     BleConfig, BoardConfig, ChipModel, ChipSeries, CommunicationConfig, InputDeviceConfig,
     MatrixType, SplitBoardConfig, SplitConfig,
 };
+use rmk_config::resolved::Hardware;
 use syn::ItemMod;
 
 use super::central::expand_serial_init;
+use crate::codegen::chip::bind_interrupt::find_extern_irqs;
 use crate::codegen::chip::chip_init::expand_chip_init;
 use crate::codegen::chip::flash::expand_flash_init;
 use crate::codegen::chip::gpio::expand_output_initialization;
@@ -44,9 +45,9 @@ pub(crate) fn parse_split_peripheral_mod(
         .hardware()
         .expect("failed to resolve hardware config");
 
+    let bind_interrupts =
+        expand_bind_interrupt_for_split_peripheral(&hardware.chip, &hardware, &item_mod, id);
     let main_function = expand_split_peripheral(id, &hardware, item_mod, &rmk_features);
-
-    let bind_interrupts = expand_bind_interrupt_for_split_peripheral(&hardware.chip, &hardware, id);
 
     let chip = &hardware.chip;
     let main_function_sig = if chip.series == ChipSeries::Esp32 {
@@ -79,8 +80,18 @@ pub(crate) fn parse_split_peripheral_mod(
 fn expand_bind_interrupt_for_split_peripheral(
     chip: &ChipModel,
     hardware: &Hardware,
+    item_mod: &ItemMod,
     peripheral_id: usize,
 ) -> TokenStream2 {
+    let extern_irqs_vec = find_extern_irqs(item_mod);
+    let extern_irqs = if extern_irqs_vec.is_empty() {
+        quote! {}
+    } else {
+        quote! {
+            #(#extern_irqs_vec)*
+        }
+    };
+
     let communication = &hardware.communication;
 
     let display_interrupt = match &hardware.board {
@@ -172,6 +183,7 @@ fn expand_bind_interrupt_for_split_peripheral(
                     #pmw33xx_spi_interrupts
                     #iqs5xx_interrupt
                     #display_interrupt
+                    #extern_irqs
                 });
 
                 #[::embassy_executor::task]
