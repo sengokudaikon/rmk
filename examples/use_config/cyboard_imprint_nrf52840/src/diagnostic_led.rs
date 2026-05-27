@@ -1,6 +1,6 @@
 use embassy_nrf::gpio::Output;
 use rmk::event::{
-    CentralConnectedEvent, ClearPeerEvent, ConnectionStatusChangeEvent, KeyboardEvent, LayerChangeEvent,
+    CentralConnectedEvent, ConnectionStatusChangeEvent, LayerChangeEvent,
     LedIndicatorEvent, PeripheralConnectedEvent,
 };
 use rmk::macros::processor;
@@ -18,12 +18,10 @@ pub enum DiagnosticRole {
         ConnectionStatusChangeEvent,
         PeripheralConnectedEvent,
         CentralConnectedEvent,
-        ClearPeerEvent,
-        KeyboardEvent,
         LayerChangeEvent,
         LedIndicatorEvent
     ],
-    poll_interval = 100
+    poll_interval = 250
 )]
 pub struct DiagnosticLed {
     pin: Output<'static>,
@@ -81,33 +79,12 @@ impl DiagnosticLed {
         self.flash(if event.connected { 2 } else { 8 });
     }
 
-    async fn on_clear_peer_event(&mut self, _event: ClearPeerEvent) {
-        self.flash(7);
-    }
-
     async fn on_layer_change_event(&mut self, event: LayerChangeEvent) {
         self.active_layer = event.0;
-        self.flash(self.active_layer.saturating_add(1));
     }
 
     async fn on_led_indicator_event(&mut self, event: LedIndicatorEvent) {
         self.caps_lock = event.0.caps_lock();
-    }
-
-    async fn on_keyboard_event(&mut self, event: KeyboardEvent) {
-        if self.role != DiagnosticRole::Central {
-            return;
-        }
-
-        if !event.pressed {
-            return;
-        }
-
-        if !matches!(event.pos, rmk::event::KeyboardEventPos::Key(_)) {
-            return;
-        }
-
-        self.flash(1);
     }
 
     async fn poll(&mut self) {
@@ -122,7 +99,7 @@ impl DiagnosticLed {
         }
 
         if self.role == DiagnosticRole::Central && self.host_connected {
-            self.show_connected_central();
+            self.set_led(true);
             return;
         }
 
@@ -135,19 +112,6 @@ impl DiagnosticLed {
             (DiagnosticRole::Central, BleState::Inactive, false) => self.set_led(self.tick % 40 == 0),
             (DiagnosticRole::Peripheral, _, true) => self.set_led(self.tick % 20 == 0 || self.tick % 20 == 2),
             (DiagnosticRole::Peripheral, _, false) => self.set_led(self.tick % 40 == 0),
-        }
-    }
-
-    fn show_connected_central(&mut self) {
-        if self.caps_lock {
-            self.set_led(true);
-            return;
-        }
-
-        match self.active_layer {
-            0 => self.set_led(self.tick % 40 == 0),
-            1 => self.set_led(self.tick % 20 == 0),
-            _ => self.set_led(self.tick % 20 == 0 || self.tick % 20 == 2),
         }
     }
 
