@@ -123,3 +123,6 @@ subs = 4
 
 [event.keyboard]
 subs = 6
+
+[event.led_indicator]
+subs = 5

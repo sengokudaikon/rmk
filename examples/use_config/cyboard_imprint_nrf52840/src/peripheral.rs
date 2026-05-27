@@ -8,8 +8,6 @@ mod imprint_rgb;
 
 #[rmk_peripheral(id = 0)]
 mod keyboard_peripheral {
-    add_interrupt!(SPIM3 => ::embassy_nrf::spim::InterruptHandler<::embassy_nrf::peripherals::SPI3>;);
-
     #[register_processor(poll)]
     fn diagnostic_led() -> crate::diagnostic_led::DiagnosticLed {
         crate::diagnostic_led::DiagnosticLed::new(
@@ -24,10 +22,12 @@ mod keyboard_peripheral {
 
     #[register_processor(poll)]
     fn imprint_rgb() -> crate::imprint_rgb::ImprintRgb {
-        let mut config = ::embassy_nrf::spim::Config::default();
-        config.frequency = ::embassy_nrf::spim::Frequency::M4;
-        crate::imprint_rgb::ImprintRgb::new(::embassy_nrf::spim::Spim::new_txonly_nosck(
-            p.SPI3, Irqs, p.P0_08, config,
-        ))
+        let mut config = ::embassy_nrf::pwm::Config::default();
+        config.prescaler = ::embassy_nrf::pwm::Prescaler::Div1;
+        config.max_duty = 20;
+        config.sequence_load = ::embassy_nrf::pwm::SequenceLoad::Common;
+        let pwm = ::embassy_nrf::pwm::SequencePwm::new_1ch(p.PWM0, p.P0_08, config)
+            .expect("PWM0");
+        crate::imprint_rgb::ImprintRgb::new(pwm)
     }
 }
