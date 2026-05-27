@@ -1,7 +1,6 @@
 use embassy_nrf::gpio::Output;
 use rmk::event::{
-    CentralConnectedEvent, ConnectionStatusChangeEvent, LayerChangeEvent,
-    LedIndicatorEvent, PeripheralConnectedEvent,
+    CentralConnectedEvent, ConnectionStatusChangeEvent, PeripheralConnectedEvent,
 };
 use rmk::macros::processor;
 use rmk::types::ble::BleState;
@@ -18,8 +17,6 @@ pub enum DiagnosticRole {
         ConnectionStatusChangeEvent,
         PeripheralConnectedEvent,
         CentralConnectedEvent,
-        LayerChangeEvent,
-        LedIndicatorEvent
     ],
     poll_interval = 250
 )]
@@ -31,8 +28,6 @@ pub struct DiagnosticLed {
     ble_state: BleState,
     host_connected: bool,
     split_connected: bool,
-    active_layer: u8,
-    caps_lock: bool,
 }
 
 impl DiagnosticLed {
@@ -45,8 +40,6 @@ impl DiagnosticLed {
             ble_state: BleState::Inactive,
             host_connected: false,
             split_connected: false,
-            active_layer: 0,
-            caps_lock: false,
         }
     }
 
@@ -77,14 +70,6 @@ impl DiagnosticLed {
         self.split_connected = event.connected;
         self.host_connected = false;
         self.flash(if event.connected { 2 } else { 8 });
-    }
-
-    async fn on_layer_change_event(&mut self, event: LayerChangeEvent) {
-        self.active_layer = event.0;
-    }
-
-    async fn on_led_indicator_event(&mut self, event: LedIndicatorEvent) {
-        self.caps_lock = event.0.caps_lock();
     }
 
     async fn poll(&mut self) {
