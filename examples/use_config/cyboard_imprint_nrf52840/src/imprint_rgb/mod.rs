@@ -1,13 +1,16 @@
-const LED_COUNT: usize = 64;
-const SEQ_LEN: usize = LED_COUNT * 24 + 1;
+pub(crate) const LED_COUNT: usize = 64;
+pub(crate) const SEQ_LEN: usize = LED_COUNT * 24 + 1;
 
-const T1H: u16 = 0x8000 | 13;
-const T0H: u16 = 0x8000 | 7;
-const RES: u16 = 0x8000;
+pub(crate) const T1H: u16 = 0x8000 | 13;
+pub(crate) const T0H: u16 = 0x8000 | 7;
+pub(crate) const RES: u16 = 0x8000;
 
-const BRIGHTNESS_CAP: u8 = 32;
+pub(crate) const BRIGHTNESS_CAP: u8 = 32;
+
+pub(crate) const MAPPING_MODE: bool = false;
 
 mod frame;
-
 mod writer;
-mod processor;
+pub(crate) mod processor;
+
+pub(crate) use processor::ImprintRgb;

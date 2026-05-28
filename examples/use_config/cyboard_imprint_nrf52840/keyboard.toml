@@ -122,7 +122,7 @@ subs = 4
 subs = 4
 
 [event.keyboard]
-subs = 6
+subs = 8
 
 [event.led_indicator]
 subs = 5

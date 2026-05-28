@@ -1,5 +1,10 @@
-﻿
-struct PwmWriter {
+﻿use embassy_nrf::pwm::{SequenceConfig, SequencePwm, SingleSequenceMode, SingleSequencer};
+use embassy_time::Timer;
+
+use crate::imprint_rgb::{RES, SEQ_LEN, T0H, T1H};
+use super::frame::LedFrame;
+
+pub(crate) struct PwmWriter {
     pwm: SequencePwm<'static>,
     words: [u16; SEQ_LEN],
     config: SequenceConfig,

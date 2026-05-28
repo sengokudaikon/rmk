@@ -1,7 +1,7 @@
 ﻿use crate::imprint_rgb::{BRIGHTNESS_CAP, LED_COUNT};
 
-struct LedFrame {
-    data: [u32; LED_COUNT],
+pub(crate) struct LedFrame {
+    pub(crate) data: [u32; LED_COUNT],
     dirty: bool,
 }
 
