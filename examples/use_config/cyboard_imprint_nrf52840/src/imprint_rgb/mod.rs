@@ -7,10 +7,10 @@ pub(crate) const RES: u16 = 0x8000;
 
 pub(crate) const BRIGHTNESS_CAP: u8 = 32;
 
-pub(crate) const MAPPING_MODE: bool = false;
-
 mod frame;
 mod writer;
 pub(crate) mod processor;
 
 pub(crate) use processor::ImprintRgb;
+
+include!(concat!(env!("OUT_DIR"), "/led_map_constants.rs"));

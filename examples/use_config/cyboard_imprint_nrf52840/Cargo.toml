@@ -59,6 +59,8 @@ rand_chacha = { version = "0.3", default-features = false }
 xz2 = "0.1.7"
 json = "0.12"
 const-gen = "1.6"
+toml = "0.8"
+serde = { version = "1", features = ["derive"] }
 
 # Split keyboard example
 [[bin]]

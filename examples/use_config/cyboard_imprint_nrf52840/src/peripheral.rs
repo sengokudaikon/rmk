@@ -28,6 +28,6 @@ mod keyboard_peripheral {
         config.sequence_load = ::embassy_nrf::pwm::SequenceLoad::Common;
         let pwm = ::embassy_nrf::pwm::SequencePwm::new_1ch(p.PWM0, p.P0_08, config)
             .expect("PWM0");
-        crate::imprint_rgb::ImprintRgb::new(pwm)
+        crate::imprint_rgb::ImprintRgb::new(pwm, false)
     }
 }

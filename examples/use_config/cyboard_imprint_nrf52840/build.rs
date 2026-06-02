@@ -16,6 +16,7 @@ use std::path::{Path, PathBuf};
 use std::{env, fs};
 
 use const_gen::*;
+use serde::Deserialize;
 use xz2::read::XzEncoder;
 
 fn main() {
@@ -24,6 +25,10 @@ fn main() {
     // Generate vial config at the root of project
     println!("cargo:rerun-if-changed=vial.json");
     generate_vial_config();
+
+    // Generate LED map constants at the root of project
+    println!("cargo:rerun-if-changed=led_map.toml");
+    generate_led_map_constants();
 
     // Put `memory.x` in our output directory and ensure it's
     // on the linker search path.
@@ -81,4 +86,82 @@ fn generate_vial_config() {
     .map(|s| "#[allow(clippy::redundant_static_lifetimes)]\n".to_owned() + s.as_str())
     .join("\n");
     fs::write(out_file, const_declarations).unwrap();
+}
+
+#[derive(Deserialize)]
+struct LedMapConfig {
+    led_map: LedMap,
+}
+
+#[derive(Deserialize)]
+struct LedMap {
+    chain_length: usize,
+    colors: LedColors,
+    left: LedHalf,
+    right: LedHalf,
+}
+
+#[derive(Deserialize)]
+struct LedColors {
+    base: [u8; 3],
+    layer1: [u8; 3],
+    layer2: [u8; 3],
+    caps: [u8; 3],
+}
+
+#[derive(Deserialize)]
+struct LedHalf {
+    map: Vec<[u8; 2]>,
+}
+
+fn generate_led_map_constants() {
+    let out_file = Path::new(&env::var_os("OUT_DIR").unwrap()).join("led_map_constants.rs");
+
+    let path = Path::new("led_map.toml");
+    let mut content = String::new();
+    File::open(path)
+        .expect("Cannot open led_map.toml")
+        .read_to_string(&mut content)
+        .expect("Cannot read led_map.toml");
+
+    let config: LedMapConfig =
+        toml::from_str(&content).expect("Failed to parse led_map.toml");
+
+    let lm = config.led_map;
+    let chain = lm.chain_length;
+
+    let fmt_half = |half: &LedHalf, name: &str| -> String {
+        let mut entries = String::new();
+        for (i, entry) in half.map.iter().enumerate().take(chain) {
+            entries.push_str(&format!(
+                "    ({}, {}), // LED {}\n",
+                entry[0], entry[1], i
+            ));
+        }
+        format!(
+            "#[rustfmt::skip]\npub const {}_LED_KEY_MAP: [(u8, u8); {chain}] = [\n{entries}];\n",
+            name,
+        )
+    };
+
+    let left = fmt_half(&lm.left, "LEFT");
+    let right = fmt_half(&lm.right, "RIGHT");
+
+    let colors = format!(
+        "#[rustfmt::skip]\npub const LAYER_COLORS: [[u8; 3]; 4] = [\n    {:?}, // base\n    {:?}, // layer1\n    {:?}, // layer2\n    {:?}, // caps\n];\n",
+        lm.colors.base, lm.colors.layer1, lm.colors.layer2, lm.colors.caps,
+    );
+
+    let chain_len = const_declaration!(pub CHAIN_LENGTH = chain);
+
+    let combined = [
+        "#[allow(clippy::redundant_static_lifetimes)]\n".to_owned(),
+        left,
+        right,
+        colors,
+        "#[allow(clippy::redundant_static_lifetimes)]\n".to_owned() + chain_len.as_str(),
+    ]
+    .join("\n");
+
+    fs::write(out_file, combined).expect("Failed to write led_map_constants.rs");
 }
