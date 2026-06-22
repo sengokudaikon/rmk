@@ -68,15 +68,15 @@ If the normal firmware makes both halves blink and central key presses flash, th
 
 ## RGB Probe
 
-The Imprint RGB probe drives a low-brightness WS2812 stream on `P0_08`/`SPIM3` using GRB color order. It lights the first 64 LED positions on each half:
+The Imprint RGB processor drives a low-brightness WS2812 stream on `P0_08`/`PWM0` using GRB color order. It lights 32 mapped per-key LEDs on each half:
 
 - base layer: dim cyan
-- layer 1: dim green
-- layer 2+: dim purple
-- BLE advertising: blinking dim blue
+- layer 1: dim magenta
+- layer 2+: dim amber
 - Caps Lock: dim red
+- pressed keys: bright white overlay, decays after ~1 s
 
-This is a hardware bring-up probe, not the final per-key RGB map. Use it to confirm that the RGB data pin, color order, and approximate LED chain are working before mapping LED indices to physical keys.
+The LED chain length and key-to-LED mapping are defined in `led_map.toml` and generated at build time into `led_map_constants.rs`.
 
 ## Layout
 
