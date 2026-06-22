@@ -34,6 +34,7 @@ pub struct ImprintRgb {
     frame: LedFrame,
     writer: PwmWriter,
     is_left: bool,
+    row_offset: u8,
     initialized: bool,
     current_layer: u8,
     caps_lock: bool,
@@ -42,7 +43,7 @@ pub struct ImprintRgb {
 }
 
 impl ImprintRgb {
-    pub fn new(pwm: SequencePwm<'static>, is_left: bool) -> Self {
+    pub fn new(pwm: SequencePwm<'static>, is_left: bool, row_offset: u8) -> Self {
         Self {
             frame: LedFrame::new(),
             writer: PwmWriter::new(pwm),
@@ -55,6 +56,7 @@ impl ImprintRgb {
                 ticks_remaining: 0,
             }; MAX_ACTIVE_PRESSES],
             active_press_count: 0,
+            row_offset,
         }
     }
 
@@ -65,7 +67,8 @@ impl ImprintRgb {
             return;
         }
         if let KeyboardEventPos::Key(pos) = event.pos {
-            if let Some(led) = self.find_led(pos.row, pos.col) {
+            let row = pos.row + self.row_offset;
+            if let Some(led) = self.find_led(row, pos.col) {
                 self.activate_press(led);
                 self.render();
             }
