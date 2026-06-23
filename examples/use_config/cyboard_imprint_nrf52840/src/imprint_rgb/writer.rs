@@ -38,6 +38,6 @@ impl PwmWriter {
         let words: &[u16] = &self.words;
         let seq = SingleSequencer::new(pwm, words, self.config.clone());
         let _ = seq.start(SingleSequenceMode::Times(1));
-        Timer::after_millis(50).await;
+        Timer::after_millis(5).await;
     }
 }

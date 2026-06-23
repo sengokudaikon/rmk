@@ -12,7 +12,7 @@ use crate::imprint_rgb::{
 use super::frame::LedFrame;
 use super::writer::PwmWriter;
 
-const PRESS_TICKS: u8 = 4;
+const DECAY_TICKS: u8 = 8;
 const MAX_ACTIVE_PRESSES: usize = 8;
 
 #[derive(Clone, Copy)]
@@ -28,7 +28,7 @@ struct ActivePress {
         LayerChangeEvent,
         LedIndicatorEvent,
     ],
-    poll_interval = 250
+    poll_interval = 30
 )]
 pub struct ImprintRgb {
     frame: LedFrame,
@@ -38,6 +38,7 @@ pub struct ImprintRgb {
     initialized: bool,
     current_layer: u8,
     caps_lock: bool,
+    candidates: u32,
     active_presses: [ActivePress; MAX_ACTIVE_PRESSES],
     active_press_count: usize,
 }
@@ -51,6 +52,7 @@ impl ImprintRgb {
             initialized: false,
             current_layer: 0,
             caps_lock: false,
+            candidates: 0,
             active_presses: [ActivePress {
                 led_index: 0,
                 ticks_remaining: 0,
@@ -63,14 +65,15 @@ impl ImprintRgb {
     async fn on_connection_status_change_event(&mut self, _event: ConnectionStatusChangeEvent) {}
 
     async fn on_keyboard_event(&mut self, event: KeyboardEvent) {
-        if !event.pressed {
-            return;
-        }
         if let KeyboardEventPos::Key(pos) = event.pos {
             let row = pos.row + self.row_offset;
             if let Some(led) = self.find_led(row, pos.col) {
-                self.activate_press(led);
-                self.render();
+                if event.pressed {
+                    self.candidates |= 1 << led;
+                } else {
+                    self.candidates &= !(1 << led);
+                    self.release_press(led);
+                }
             }
         }
     }
@@ -94,8 +97,9 @@ impl ImprintRgb {
             self.initialized = true;
         }
 
-        let presses_expired = self.decay_active_presses();
-        if presses_expired {
+        let promoted = self.promote_candidates();
+        let expired = self.decay_active_presses();
+        if promoted || expired {
             self.render();
         }
 
@@ -106,6 +110,28 @@ impl ImprintRgb {
         self.writer.encode(&self.frame);
         self.writer.play().await;
         self.frame.mark_clean();
+    }
+
+    fn promote_candidates(&mut self) -> bool {
+        if self.candidates == 0 {
+            return false;
+        }
+        for led in 0..CHAIN_LENGTH {
+            if self.candidates & (1 << led) != 0 {
+                self.activate_press(led);
+            }
+        }
+        self.candidates = 0;
+        true
+    }
+
+    fn release_press(&mut self, led: usize) {
+        for i in 0..self.active_press_count {
+            if self.active_presses[i].led_index == led as u8 {
+                self.active_presses[i].ticks_remaining = DECAY_TICKS;
+                return;
+            }
+        }
     }
 
     fn find_led(&self, row: u8, col: u8) -> Option<usize> {
@@ -120,14 +146,14 @@ impl ImprintRgb {
     fn activate_press(&mut self, led_index: usize) {
         for i in 0..self.active_press_count {
             if self.active_presses[i].led_index == led_index as u8 {
-                self.active_presses[i].ticks_remaining = PRESS_TICKS;
+                self.active_presses[i].ticks_remaining = 0;
                 return;
             }
         }
         if self.active_press_count < MAX_ACTIVE_PRESSES {
             self.active_presses[self.active_press_count] = ActivePress {
                 led_index: led_index as u8,
-                ticks_remaining: PRESS_TICKS,
+                ticks_remaining: 0,
             };
             self.active_press_count += 1;
         }
@@ -137,14 +163,16 @@ impl ImprintRgb {
         let mut changed = false;
         let mut i = 0;
         while i < self.active_press_count {
-            self.active_presses[i].ticks_remaining -= 1;
-            if self.active_presses[i].ticks_remaining == 0 {
-                self.active_press_count -= 1;
-                self.active_presses[i] = self.active_presses[self.active_press_count];
-                changed = true;
-            } else {
-                i += 1;
+            if self.active_presses[i].ticks_remaining > 0 {
+                self.active_presses[i].ticks_remaining -= 1;
+                if self.active_presses[i].ticks_remaining == 0 {
+                    self.active_press_count -= 1;
+                    self.active_presses[i] = self.active_presses[self.active_press_count];
+                    changed = true;
+                    continue;
+                }
             }
+            i += 1;
         }
         changed
     }
