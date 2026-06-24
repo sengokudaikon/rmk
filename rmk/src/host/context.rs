@@ -56,6 +56,11 @@ impl<'a> KeyboardContext<'a> {
         self.keymap.get_keymap_config()
     }
 
+    /// Number of rotary encoders configured in the keymap.
+    pub fn num_encoders(&self) -> usize {
+        self.keymap.num_encoders()
+    }
+
     pub async fn set_action(&self, layer: u8, row: u8, col: u8, action: KeyAction) {
         self.keymap
             .set_action_at(KeyboardEventPos::key_pos(col, row), layer as usize, action);
