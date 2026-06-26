@@ -73,6 +73,11 @@ keymap = [
 
 [storage]
 
+[host]
+# Development firmware: start Vial unlocked so osyn can read live matrix state.
+# Remove this or configure explicit unlock_keys before shipping/shared builds.
+vial_insecure = true
+
 [ble]
 enabled = true
 
